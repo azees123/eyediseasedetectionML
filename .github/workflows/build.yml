@@ -41,4 +41,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: eye_disease_detector-debug.apk
-        path: ./bin/*.apk  # Upload the APK generated in the ./bin/ directory
+        path: ./bin/*.apk  # Ensure this points to the location of the APK
