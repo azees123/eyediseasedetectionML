@@ -7,15 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # Install libtinfo5 to solve the dependency issue
+      
+      # Install libtinfo5 to resolve the issue
       - name: Install libtinfo5
-        run: sudo apt-get install -y libtinfo5
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtinfo5
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
         with:
-          python-version: 3.12
+          python-version: 3.8
           buildozer-cmd: buildozer -v android debug
 
       - name: Upload artifacts
