@@ -14,17 +14,17 @@ jobs:
           uname -a
           lsb_release -a
 
-      # Install libncurses-dev to resolve the issue
-      - name: Install libncurses-dev
+      # Install libtinfo6 to resolve the issue
+      - name: Install libtinfo6
         run: |
           sudo apt-get update
-          sudo apt-get install -y libncurses-dev
+          sudo apt-get install -y libtinfo6
 
-      # Install Buildozer dependencies
-      - name: Install Buildozer dependencies
+      # Install libncurses6 to resolve the issue
+      - name: Install libncurses6
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential python3-dev
+          sudo apt-get install -y libncurses6
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
@@ -37,4 +37,3 @@ jobs:
         with:
           name: package
           path: ./bin/*.apk
-
