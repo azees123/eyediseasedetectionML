@@ -3,14 +3,14 @@ name: Build APK with Buildozer
 on:
   push:
     branches:
-      - main  # Trigger build on push to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Trigger build on pull request to main
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Run the build on the latest Ubuntu runner
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
     - name: Checkout repository
@@ -35,10 +35,14 @@ jobs:
 
     - name: Build APK using Buildozer
       run: |
-        buildozer android debug  # This command will build the APK in debug mode
+        buildozer android debug  # Build the APK in debug mode
+
+    - name: List the contents of the ./bin/ directory (debug step)
+      run: |
+        ls -al ./bin/  # List the files in the bin directory to check if the APK is present
 
     - name: Upload APK as artifact
       uses: actions/upload-artifact@v2
       with:
         name: eye_disease_detector-debug.apk
-        path: ./bin/*.apk  # Ensure this points to the location of the APK
+        path: ./bin/*.apk  # Ensure this is the correct path for the APK file
