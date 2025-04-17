@@ -25,12 +25,19 @@ jobs:
           pip install cython  # Install Cython here
           pip install buildozer  # Install Buildozer
 
-      # Step 4: Build APK using Buildozer
+      # Step 4: Install the correct NDK version (version 25 or above)
+      - name: Install Android NDK 25
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -P /tmp
+          unzip /tmp/android-ndk-r25b-linux.zip -d $HOME/.buildozer/android/platform/
+          mv $HOME/.buildozer/android/platform/android-ndk-r25b $HOME/.buildozer/android/platform/android-ndk
+
+      # Step 5: Build APK using Buildozer
       - name: Build APK
         run: |
           buildozer -v android debug
 
-      # Step 5: Upload the generated APK
+      # Step 6: Upload the generated APK
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
