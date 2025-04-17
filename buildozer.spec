@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = Eyediseasedetection
+title = My Application
 
 # (str) Package name
-package.name = Eyediseasedetection
+package.name = myapp
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
@@ -13,7 +13,7 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,tflite
+source.include_exts = py,png,jpg,kv,tflite
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,numpy,pillow,plyer,tensorflow
+requirements = python3,kivy,tensorflow
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -67,7 +67,7 @@ orientation = portrait
 osx.python_version = 3
 
 # Kivy version to use
-osx.kivy_version = 2.3.0
+osx.kivy_version = 1.9.1
 
 #
 # Android specific
@@ -96,7 +96,7 @@ fullscreen = 0
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
 #android.permissions = android.permission.INTERNET, (name=android.permission.WRITE_EXTERNAL_STORAGE;maxSdkVersion=18)
-android.permissions = READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.permissions = android.permission.READ_EXTERNAL_STORAGE, android.permission.WRITE_EXTERNAL_STORAGE
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -108,16 +108,16 @@ android.api = 31
 android.minapi = 21
 
 # (int) Android SDK version to use
-android.sdk = 20
+#android.sdk = 20
 
 # (str) Android NDK version to use
-android.ndk = 23b
+#android.ndk = 23b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-android.ndk_api = 21
+#android.ndk_api = 21
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
-android.private_storage = True
+#android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
 #android.ndk_path =
@@ -187,7 +187,7 @@ android.accept_sdk_license = True
 # Either form may be used, and assets need not be in 'source.include_exts'.
 # 1) android.add_assets = source_asset_relative_path
 # 2) android.add_assets = source_asset_path:destination_asset_relative_path
-#android.add_assets =
+android.add_assets = eye_disease_model.tflite
 
 # (list) Put these files or directories in the apk res directory.
 # The option may be used in three ways, the value may contain one or zero ':'
@@ -202,7 +202,7 @@ android.accept_sdk_license = True
 #android.add_resources =
 
 # (list) Gradle dependencies to add
-#android.gradle_dependencies =
+android.gradle_dependencies = "org.tensorflow:tensorflow-lite:2.11.0"
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
@@ -258,7 +258,7 @@ android.accept_sdk_license = True
 
 # (bool) Indicate whether the screen should stay on
 # Don't forget to add the WAKE_LOCK permission if you set this to True
-android.wakelock = True
+#android.wakelock = False
 
 # (list) Android application meta-data to set (key=value format)
 #android.meta_data =
@@ -303,13 +303,13 @@ android.allow_backup = True
 # android.manifest_placeholders = [:]
 
 # (bool) Skip byte compile for .py files
-# android.no-byte-compile-python = False
+android.no-byte-compile-python = False
 
 # (str) The format used to package the app for release mode (aab or apk or aar).
-# android.release_artifact = aab
+android.release_artifact = aab
 
 # (str) The format used to package the app for debug mode (apk or aar).
-# android.debug_artifact = apk
+android.debug_artifact = apk
 
 #
 # Python for android (p4a) specific
@@ -412,7 +412,7 @@ warn_on_root = 1
 # build_dir = ./.buildozer
 
 # (str) Path to build output (i.e. .apk, .aab, .ipa) storage
- bin_dir = ./bin
+# bin_dir = ./bin
 
 #    -----------------------------------------------------------------------------
 #    List as sections
