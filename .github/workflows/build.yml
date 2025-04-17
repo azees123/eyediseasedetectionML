@@ -1,4 +1,4 @@
-on: 
+on:
   push:
     branches: [ main ]
 
@@ -8,11 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Install libtinfo5 to resolve the issue
-      - name: Install libtinfo5
+      # Install libncurses5 to resolve the issue
+      - name: Install libncurses5
         run: |
           sudo apt-get update
-          sudo apt-get install -y libtinfo5
+          sudo apt-get install -y libncurses5
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
