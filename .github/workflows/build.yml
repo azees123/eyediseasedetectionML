@@ -1,60 +1,37 @@
-name: Build APK with Buildozer
-
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v4
 
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.12.8
+      # Step 2: Set up Python environment
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev openjdk-8-jdk zlib1g-dev
-        python -m pip install --upgrade pip
-        python -m pip install buildozer
+      # Step 3: Install Buildozer and dependencies
+      - name: Install Buildozer and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+          pip install --upgrade pip
+          pip install buildozer
 
-    - name: Install Android SDK
-      run: |
-        sudo apt-get install -y android-sdk
-        echo "sdk.dir=/usr/lib/android-sdk" > local.properties
+      # Step 4: Build APK using Buildozer
+      - name: Build APK
+        run: |
+          buildozer -v android debug
 
-    - name: Build APK using Buildozer
-      run: |
-        buildozer android debug  # Build the APK in debug mode
-
-    - name: List contents of the ./bin/ directory for debug
-      run: |
-        ls -al ./bin/  # List the files in the bin directory to check if the APK is present
-
-    - name: Check if APK exists
-      id: apk_check
-      run: |
-        if [ -f ./bin/*.apk ]; then
-          echo "APK exists!"
-          echo "::set-output name=apk_exists::true"
-        else
-          echo "APK does not exist!"
-          echo "::set-output name=apk_exists::false"
-        fi
-
-    - name: Upload APK as artifact if it exists
-      if: steps.apk_check.outputs.apk_exists == 'true'
-      uses: actions/upload-artifact@v2
-      with:
-        name: eye_disease_detector-debug.apk
-        path: ./bin/*.apk  # Ensure this is the correct path for the APK file
+      # Step 5: Upload the generated APK
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-package
+          path: ./bin/*.apk
