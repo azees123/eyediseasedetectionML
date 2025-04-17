@@ -7,12 +7,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      # Install libncurses5 to resolve the issue
-      - name: Install libncurses5
+
+      # Check the Ubuntu version
+      - name: Check Ubuntu version
+        run: |
+          uname -a
+          lsb_release -a
+
+      # Install libncurses-dev to resolve the issue
+      - name: Install libncurses-dev
         run: |
           sudo apt-get update
-          sudo apt-get install -y libncurses5
+          sudo apt-get install -y libncurses-dev
+
+      # Install Buildozer dependencies
+      - name: Install Buildozer dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
@@ -25,3 +37,4 @@ jobs:
         with:
           name: package
           path: ./bin/*.apk
+
