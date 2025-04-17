@@ -17,12 +17,12 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y curl unzip git zip libffi-dev libssl-dev \
-                              libsqlite3-dev libbz2-dev libncurses5 libstdc++6 \
-                              libtinfo6 build-essential python3-pip
+                              libsqlite3-dev libbz2-dev libtinfo6 build-essential python3-pip
 
-          # Manually install libtinfo5 if needed (useful for older recipes)
-          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
-          sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb || true
+          # If libtinfo6 is not enough, manually install libtinfo5 if required.
+          # Also, libncurses5 is often replaced by libncurses6 in modern systems.
+          sudo apt install -y libtinfo5 || true
+          sudo apt install -y libncurses6
 
       - name: Set up Python
         uses: actions/setup-python@v5
