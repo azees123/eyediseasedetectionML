@@ -3,10 +3,10 @@ name: Build APK with Buildozer
 on:
   push:
     branches:
-      - main  # You can change this to the branch you use to trigger builds
+      - main  # Or any other branch you want to trigger the build on
   pull_request:
     branches:
-      - main  # You can change this to the branch you use to trigger builds
+      - main
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8  # You can adjust to a specific Python version if necessary
+        python-version: 3.8
 
     - name: Install dependencies
       run: |
@@ -35,7 +35,7 @@ jobs:
           openjdk-8-jdk \
           zlib1g-dev
         python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt  # Ensure you have your requirements listed
+        python -m pip install -r requirements.txt
 
     - name: Install Buildozer
       run: |
@@ -57,8 +57,13 @@ jobs:
       run: |
         buildozer android debug
 
+    - name: Verify APK location
+      run: |
+        echo "Checking if APK exists..."
+        ls ./bin  # Ensure that the APK file is being generated in the ./bin directory
+
     - name: Upload APK as artifact
       uses: actions/upload-artifact@v2
       with:
         name: eye_disease_detector-debug.apk
-        path: ./bin/*.apk  # This path should correctly point to the APK location
+        path: ./bin/*.apk  # Ensure this points to the correct APK file
