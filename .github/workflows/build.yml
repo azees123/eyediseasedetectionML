@@ -8,10 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libncurses-dev libtinfo5
+      # Install libtinfo5 to solve the dependency issue
+      - name: Install libtinfo5
+        run: sudo apt-get install -y libtinfo5
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
