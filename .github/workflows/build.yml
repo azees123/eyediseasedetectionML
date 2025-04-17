@@ -14,26 +14,26 @@ jobs:
           uname -a
           lsb_release -a
 
-      # Install libtinfo6
+      # Install libtinfo6 (try alternative to libtinfo5)
       - name: Install libtinfo6
         run: |
           sudo apt-get update
           sudo apt-get install -y libtinfo6
+
+      # Manually install libtinfo5 from older Ubuntu 20.04 archive
+      - name: Install libtinfo5 from Ubuntu 20.04 Archive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.2-0ubuntu1_amd64.deb
+          sudo dpkg -i libtinfo5_6.2-0ubuntu1_amd64.deb
+          sudo apt-get install -f
 
       # Install Buildozer dependencies
       - name: Install Buildozer dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential python3-dev libncurses-dev
-
-      # Install libtinfo5 from Ubuntu archive (manual install)
-      - name: Install libtinfo5 from Ubuntu archive
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.2-0ubuntu2_amd64.deb
-          sudo dpkg -i libtinfo5_6.2-0ubuntu2_amd64.deb
-          sudo apt-get install -f
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
