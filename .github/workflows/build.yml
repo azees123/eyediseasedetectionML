@@ -37,13 +37,24 @@ jobs:
       run: |
         buildozer android debug  # Build the APK in debug mode
 
-    - name: List the contents of the ./bin/ directory (debug step)
+    - name: List contents of the ./bin/ directory for debug
       run: |
         ls -al ./bin/  # List the files in the bin directory to check if the APK is present
 
+    - name: Check if APK exists
+      id: apk_check
+      run: |
+        if [ -f ./bin/*.apk ]; then
+          echo "APK exists!"
+          echo "::set-output name=apk_exists::true"
+        else
+          echo "APK does not exist!"
+          echo "::set-output name=apk_exists::false"
+        fi
+
     - name: Upload APK as artifact if it exists
+      if: steps.apk_check.outputs.apk_exists == 'true'
       uses: actions/upload-artifact@v2
-      if: ${{ exists('./bin/*.apk') }}
       with:
         name: eye_disease_detector-debug.apk
         path: ./bin/*.apk  # Ensure this is the correct path for the APK file
