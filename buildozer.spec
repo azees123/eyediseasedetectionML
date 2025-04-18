@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,plyer,pillow,numpy,tensorflow-cpu
+requirements = python3,kivy,plyer,pillow,numpy,tensorflow-tensorflow-lite
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -141,7 +141,7 @@ android.private_storage = True
 # agreements. This is intended for automation only. If set to False,
 # the default, you will be shown the license when first running
 # buildozer.
-#android.accept_sdk_license = True
+android.accept_sdk_license = True
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.kivy.android.PythonActivity
