@@ -12,6 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install missing dependencies (libtinfo5)
+        run: |
+          sudo apt update
+          sudo apt install -y libtinfo5
+
       - name: Cache buildozer .buildozer & gradle
         uses: actions/cache@v3
         with:
