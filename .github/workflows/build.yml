@@ -51,24 +51,18 @@ jobs:
 
       - name: Install dependencies and build APK
         run: |
-          python3 -m venv venv
-          source venv/bin/activate
           pip install --upgrade pip
           pip install buildozer cython python-for-android
 
-          # Set NDK environment variables
+          # Ensure Buildozer uses NDK 25
           export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
           export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
 
-          # Patch buildozer.spec to use the installed NDK
-          sed -i '/^android.ndk_path/d' buildozer.spec
-          echo "android.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653" >> buildozer.spec
+          # Force correct NDK version in buildozer.spec
+          sed -i 's/^#* *android.ndk *=.*/android.ndk = 25.2.9519653/' buildozer.spec || true
 
-          sed -i '/^android.ndk *=/d' buildozer.spec
-          echo "android.ndk = 25.2.9519653" >> buildozer.spec
-
-          # Build APK without auto-upgrading (avoids broken downloads)
-          buildozer android debug --log_level 2 --no-android-upgrade
+          buildozer android clean || true
+          buildozer android debug --log_level 2
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
