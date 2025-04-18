@@ -1,54 +1,24 @@
-name: Build Android APK with Buildozer
-
 on:
   push:
-    branches:
-      - main  # Trigger on pushes to the main branch
-  pull_request:
-    branches:
-      - main  # Trigger on pull requests targeting the main branch
+    branches: [ main ]  # Trigger the workflow on pushes to the 'main' branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # The environment to run the build in
+    runs-on: ubuntu-latest  # Running on the latest Ubuntu environment
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Step 1: Checkout the code
+      - uses: actions/checkout@v4  # Checkout the latest code
 
-    # Step 2: Set up Python 3.8 (or the version you use in your project)
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      # Step 2: Build the APK using Buildozer
+      - name: Build APK
+        uses: digreatbrian/buildozer-action@v2  # Using the Buildozer action to build APK
+        with:
+          buildozer-cmd: buildozer -v android debug  # Command to build the APK
 
-    # Step 3: Install required dependencies (Buildozer and others)
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-pip python3-setuptools python3-dev build-essential libssl-dev libffi-dev \
-        libsqlite3-dev libreadline-dev libbz2-dev zlib1g-dev unzip openjdk-11-jdk
-        python3 -m pip install --upgrade pip
-        pip install buildozer
-        pip install tensorflow-cpu plyer pillow numpy kivy  # Install required Python packages
-
-    # Step 4: Install Android SDK and NDK (as required for Buildozer to build Android apps)
-    - name: Set up Android SDK and NDK
-      run: |
-        wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
-        unzip commandlinetools-linux-6858069_latest.zip -d $HOME/android
-        yes | $HOME/android/cmdline-tools/bin/sdkmanager --licenses
-        $HOME/android/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0" "ndk;23.1.7779620"
-
-    # Step 5: Build APK using Buildozer
-    - name: Build APK with Buildozer
-      run: |
-        buildozer android debug  # Change to 'android release' for production builds
-
-    # Step 6: Upload APK as artifact
-    - name: Upload APK as artifact
-      uses: actions/upload-artifact@v2  # Use v2 to avoid issues with v3
-      with:
-        name: EyeDiseaseDetector-APK
-        path: ./bin/*.apk  # Ensure this path matches the location where your APK is generated
+      # Step 3: Upload APK as artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2  # Use the correct stable version v2 for uploading artifacts
+        with:
+          name: package
+          path: ./bin/*.apk  # Ensure this path is where the APK is saved
