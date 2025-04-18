@@ -11,6 +11,8 @@ jobs:
 
     env:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
+      ANDROID_NDK: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
 
     steps:
       - name: Checkout code
@@ -27,16 +29,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Cache Android SDK and NDK
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/android-sdk
-            ${{ github.workspace }}/.buildozer
-          key: ${{ runner.os }}-android-sdk-ndk-${{ hashFiles('**/buildozer.spec') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-ndk-
-
       - name: Install Android SDK and NDK
         run: |
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
@@ -50,7 +42,8 @@ jobs:
             "platform-tools" \
             "platforms;android-31" \
             "build-tools;33.0.2" \
-            "ndk;25.2.9519653"
+            "ndk;25.2.9519653" \
+            "cmake;3.22.1"
 
       - name: Set SDK tools in PATH
         run: |
@@ -59,43 +52,37 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_PATH
 
-      - name: Install Buildozer and dependencies
+      - name: Convert model to TensorFlow Lite
         run: |
-          pip install --upgrade pip
+          python3 -m pip install tensorflow
+          python3 -c "
+          import tensorflow as tf
+          model = tf.keras.models.load_model('eye_disease_model.h5')
+          converter = tf.lite.TFLiteConverter.from_keras_model(model)
+          tflite_model = converter.convert()
+          open('eye_disease_model.tflite', 'wb').write(tflite_model)
+          "
+
+      - name: Update buildozer.spec
+        run: |
+          echo -e "\n[app]\nrequirements = python3,kivy,plyer,Pillow,numpy,tflite_runtime~=2.14.0\nandroid.ndk = 25.2.9519653\nandroid.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653\nsource.include_exts = py,png,jpg,kv,tflite" >> buildozer.spec
+
+      - name: Install dependencies and build APK
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip wheel setuptools
           pip install buildozer cython python-for-android
 
-          export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
+          # Explicitly set NDK paths
+          export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
           export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
 
-          # Make sure buildozer.spec uses the correct NDK
-          sed -i 's/^#* *android.ndk *=.*/android.ndk = 25.2.9519653/' buildozer.spec || true
+          # Build with verbose logging
+          buildozer android clean
+          buildozer -v android debug
 
-          # Include tflite file
-          sed -i 's|^source.include_exts *=.*|source.include_exts = py,png,jpg,kv,tflite|' buildozer.spec || true
-
-      - name: Output environment variables
-        run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "ANDROID_NDK=$ANDROID_NDK"
-          echo "PATH=$PATH"
-
-      - name: Verify Android SDK/NDK installation
-        run: |
-          sdkmanager --list
-          ndk-build --version
-          java -version
-          python --version
-
-      - name: Build APK
-        run: |
-          buildozer android clean || true
-          buildozer android debug --log_level 2
-
-      - name: Check if APK exists
-        run: |
-          if [ -f bin/*.apk ]; then echo "APK found"; else echo "APK not found"; exit 1; fi
-
-      - name: Upload APK
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: EyeDiseaseDetector-APK
