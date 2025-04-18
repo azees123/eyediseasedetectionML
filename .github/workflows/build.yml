@@ -8,12 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Increase timeout for Android SDK/NDK downloads
+    timeout-minutes: 30  # Increased timeout for Android SDK/NDK downloads
 
     env:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
-      ANDROID_NDK_VERSION: 25.2.9519653
-      ANDROID_BUILD_TOOLS_VERSION: 33.0.2
+      ANDROID_NDK_VERSION: 25b  # Matches buildozer.spec
+      ANDROID_BUILD_TOOLS_VERSION: 33.0.2  # Matches buildozer.spec
       ANDROID_PLATFORM_VERSION: 31
 
     steps:
@@ -34,11 +34,11 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y unzip zip git
+          sudo apt-get install -y unzip zip git wget
 
-      - name: Install Android SDK and NDK
+      - name: Install Android SDK
         run: |
-          # Create SDK directory
+          # Create SDK directory structure
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           cd $ANDROID_SDK_ROOT/cmdline-tools
           
@@ -61,8 +61,10 @@ jobs:
             "platform-tools" \
             "platforms;android-$ANDROID_PLATFORM_VERSION" \
             "build-tools;$ANDROID_BUILD_TOOLS_VERSION"
-          
-          # Install NDK directly (more reliable than through Buildozer)
+
+      - name: Install Android NDK
+        run: |
+          mkdir -p $ANDROID_SDK_ROOT/ndk
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
           unzip -q ndk.zip -d $ANDROID_SDK_ROOT
           mv $ANDROID_SDK_ROOT/android-ndk-r25b $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION
@@ -88,10 +90,10 @@ jobs:
           export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION
           export ANDROID_API=$ANDROID_PLATFORM_VERSION
           
-          # Build the APK
+          # Build the APK with verbose logging
           buildozer -v android debug
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: EyeDiseaseDetector-APK
