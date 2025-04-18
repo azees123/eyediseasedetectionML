@@ -35,7 +35,8 @@ jobs:
           sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
             "platform-tools" \
             "platforms;android-31" \
-            "build-tools;33.0.2"
+            "build-tools;33.0.2" \
+            "build-tools;30.0.3"  # Trying another build-tools version for AIDL compatibility
 
       - name: List Android SDK directories (Debugging Step)
         run: |
@@ -45,24 +46,30 @@ jobs:
           ls -l $ANDROID_SDK_ROOT/cmdline-tools/latest/bin
           echo "Listing build-tools:"
           ls -l $ANDROID_SDK_ROOT/build-tools/33.0.2
+          ls -l $ANDROID_SDK_ROOT/build-tools/30.0.3  # Check another version of build-tools
 
       - name: Add Android SDK Tools to PATH (including AIDL)
         run: |
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/build-tools/30.0.3" >> $GITHUB_PATH
 
-          # Check if AIDL exists and is executable
-          find $ANDROID_SDK_ROOT -name "aidl"
-
-          if [ ! -f "$ANDROID_SDK_ROOT/build-tools/33.0.2/aidl" ]; then
-            echo "❌ AIDL not found in build-tools!"
+          # Check if AIDL exists and is executable in both versions
+          if [ -f "$ANDROID_SDK_ROOT/build-tools/33.0.2/aidl" ]; then
+            echo "✅ AIDL found in 33.0.2"
+            chmod +x $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl
+            which aidl
+            aidl --version || echo "✅ AIDL is now executable in 33.0.2"
+          elif [ -f "$ANDROID_SDK_ROOT/build-tools/30.0.3/aidl" ]; then
+            echo "✅ AIDL found in 30.0.3"
+            chmod +x $ANDROID_SDK_ROOT/build-tools/30.0.3/aidl
+            which aidl
+            aidl --version || echo "✅ AIDL is now executable in 30.0.3"
+          else
+            echo "❌ AIDL not found in either build-tools version!"
             exit 1
           fi
-          
-          chmod +x $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl
-          which aidl
-          aidl --version || echo "✅ AIDL is now executable"
 
       - name: Build APK using Buildozer
         uses: digreatbrian/buildozer-action@v2
