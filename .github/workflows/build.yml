@@ -63,18 +63,21 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install buildozer cython python-for-android
+          pip list  # Show installed packages to debug
 
       # Clean previous builds
       - name: Clean previous builds
         run: |
+          source venv/bin/activate
           buildozer android clean || echo "Clean failed, continue anyway"
 
       # Build APK using Buildozer
       - name: Build APK using Buildozer
         run: |
+          source venv/bin/activate
           set -x
           export PATH="$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/build-tools/33.0.2:$ANDROID_SDK_ROOT/build-tools/30.0.3:$PATH"
-          buildozer android debug --debug || { echo "Buildozer failed"; exit 1; }
+          ./venv/bin/buildozer android debug --debug || { echo "Buildozer failed"; exit 1; }
           set +x
 
       # Upload APK as an artifact
