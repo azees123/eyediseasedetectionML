@@ -19,33 +19,37 @@ jobs:
         with:
           python-version: 3.8
 
-      # Step 3: Install system & Python dependencies
+      # Step 3: Install system dependencies and Buildozer
       - name: Install system dependencies and Buildozer
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev zip unzip
-          sudo apt-get install -y libncurses6
+          sudo apt-get install -y libncurses6 openjdk-11-jdk
           python -m pip install --upgrade pip
           pip install cython
           pip install buildozer
+          pip install python-for-android  # Ensure python-for-android is installed
 
       # Step 4: Install Android SDK, NDK, and JDK
       - name: Install Android SDK, NDK, and JDK
         run: |
-          sudo apt-get install -y openjdk-11-jdk
-          sudo apt-get install -y unzip
-          sudo apt-get install -y libncurses6  # Ensure libncurses6 is installed for compatibility
-          # Install Android SDK and NDK
           wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
           unzip commandlinetools-linux-7302050_latest.zip -d $HOME/Android
           yes | $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/sdk --licenses
           yes | $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/sdk "platform-tools" "platforms;android-31" "build-tools;30.0.3" "ndk;21.4.7075529"
+        
+      # Step 5: Set environment variables
+      - name: Set environment variables for Android SDK/NDK
+        run: |
+          echo "ANDROID_HOME=$HOME/Android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$HOME/Android/sdk/ndk/21.4.7075529" >> $GITHUB_ENV
+          echo "JAVA_HOME=/usr/lib/jvm/temurin-11-jdk-amd64" >> $GITHUB_ENV
 
-      # Step 5: Build APK with Buildozer
+      # Step 6: Build APK with Buildozer
       - name: Build APK with Buildozer
         run: buildozer -v --log-level=debug android debug
 
-      # Step 6: Upload APK
+      # Step 7: Upload APK
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
@@ -53,7 +57,7 @@ jobs:
           name: apk-package
           path: ./bin/*.apk
 
-      # Step 7: Upload Build logs on failure
+      # Step 8: Upload Build logs on failure
       - name: Upload Buildozer Logs
         if: failure()
         uses: actions/upload-artifact@v4
