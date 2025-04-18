@@ -12,11 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Manually install libtinfo5
+      - name: Install dependencies
         run: |
           sudo apt update
-          wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.1-1ubuntu1.18.04_amd64.deb
-          sudo dpkg -i libtinfo5_6.1-1ubuntu1.18.04_amd64.deb
+          sudo apt install -y libtinfo6
+          # Alternatively, use the following block if libtinfo5 is required
+          # sudo apt install -y wget
+          # wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.1-1ubuntu1.18.04_amd64.deb
+          # sudo dpkg -i libtinfo5_6.1-1ubuntu1.18.04_amd64.deb || true
+          # sudo apt-get install -f -y
 
       - name: Cache buildozer .buildozer & gradle
         uses: actions/cache@v3
