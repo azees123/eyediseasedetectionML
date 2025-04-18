@@ -115,7 +115,7 @@ android.ndk = 25.2.9519653
 
 android.target = 31 
 
-android.build_tools = 36.0.0
+android.build_tools = 33.0.2
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 android.ndk_api = 21
@@ -217,12 +217,12 @@ android.gradle_dependencies = "org.tensorflow:tensorflow-lite:2.11.0"
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
 # android.enable_androidx requires android.api >= 28
-#android.enable_androidx = True
+android.enable_androidx = True
 
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
 # see https://developer.android.com/studio/write/java8-support for further information
-# android.add_compile_options = "sourceCompatibility = 1.8", "targetCompatibility = 1.8"
+ android.add_compile_options = "sourceCompatibility = 1.8", "targetCompatibility = 1.8"
 
 # (list) Gradle repositories to add {can be necessary for some android.gradle_dependencies}
 # please enclose in double quotes 
@@ -301,7 +301,7 @@ android.archs = arm64-v8a, armeabi-v7a
 # android.numeric_version = 1
 
 # (bool) enables Android auto backup feature (Android API >=23)
-android.allow_backup = True
+android.allow_backup = False
 
 # (str) XML file for custom backup rules (see official auto backup documentation)
 # android.backup_rules =
@@ -313,7 +313,7 @@ android.allow_backup = True
 # android.manifest_placeholders = [:]
 
 # (bool) Skip byte compile for .py files
-android.no-byte-compile-python = False
+android.no-byte-compile-python = True
 
 # (str) The format used to package the app for release mode (aab or apk or aar).
 android.release_artifact = aab
