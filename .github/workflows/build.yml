@@ -31,6 +31,8 @@ jobs:
           mv temp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+          
+          # Install required Android SDK components
           sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-31" "build-tools;33.0.2" "build-tools;30.0.3"
 
       - name: List SDK directories (Debug)
@@ -50,12 +52,27 @@ jobs:
           sudo apt update
           sudo apt install -y python3-pip python3-venv
           pip install buildozer
-          pip install cython  # Install Cython
+          pip install cython
+
+      - name: Check if AIDL is available
+        run: |
+          if [ -f "$ANDROID_SDK_ROOT/build-tools/33.0.2/aidl" ]; then
+            echo "✅ AIDL found in 33.0.2"
+            chmod +x $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl
+            which aidl
+          elif [ -f "$ANDROID_SDK_ROOT/build-tools/30.0.3/aidl" ]; then
+            echo "✅ AIDL found in 30.0.3"
+            chmod +x $ANDROID_SDK_ROOT/build-tools/30.0.3/aidl
+            which aidl
+          else
+            echo "❌ AIDL not found!"
+            exit 1
+          fi
 
       - name: Build APK using Buildozer
         run: |
           set -x
-          export PATH="$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/build-tools/33.0.2:$PATH"
+          export PATH="$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/build-tools/33.0.2:$ANDROID_SDK_ROOT/build-tools/30.0.3:$PATH"
           buildozer -v android debug --debug || { echo "Buildozer failed"; exit 1; }
           set +x
 
