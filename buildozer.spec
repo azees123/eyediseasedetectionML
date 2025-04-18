@@ -111,7 +111,7 @@ android.minapi = 21
 android.sdk = 31
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 21b
 
 android.target = 31 
 
