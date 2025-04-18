@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_RUNNER_DEBUG: true
+      ACTIONS_STEP_DEBUG: true
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -20,7 +23,7 @@ jobs:
       - name: Set up Python 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8  # You can use 3.8 or another version that fits your project
+          python-version: 3.8
 
       # Install dependencies
       - name: Install dependencies
@@ -77,9 +80,9 @@ jobs:
         run: |
           buildozer android debug
 
-      # Upload APK as an artifact
+      # Upload APK as an artifact (alternative action)
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: jamesives/gh-actions-upload-artifact@v1.0.2
         with:
           name: android-apk
           path: bin/*.apk
