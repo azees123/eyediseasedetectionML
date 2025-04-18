@@ -59,11 +59,13 @@ jobs:
           if [ -f "$ANDROID_SDK_ROOT/build-tools/33.0.2/aidl" ]; then
             echo "✅ AIDL found in 33.0.2"
             chmod +x $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl
+            ls -l $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl  # Ensure it's executable
             which aidl
             aidl --version || echo "✅ AIDL is now executable in 33.0.2"
           elif [ -f "$ANDROID_SDK_ROOT/build-tools/30.0.3/aidl" ]; then
             echo "✅ AIDL found in 30.0.3"
             chmod +x $ANDROID_SDK_ROOT/build-tools/30.0.3/aidl
+            ls -l $ANDROID_SDK_ROOT/build-tools/30.0.3/aidl  # Ensure it's executable
             which aidl
             aidl --version || echo "✅ AIDL is now executable in 30.0.3"
           else
@@ -71,10 +73,10 @@ jobs:
             exit 1
           fi
 
-      - name: Run AIDL Debugging Command
+      - name: Run AIDL Debugging Command (Full Path)
         run: |
+          echo "Running AIDL with full path..."
           if [ -f "$ANDROID_SDK_ROOT/build-tools/33.0.2/aidl" ]; then
-            echo "Running AIDL with debug output..."
             $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl --help
           fi
 
