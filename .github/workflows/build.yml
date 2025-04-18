@@ -77,7 +77,7 @@ jobs:
           buildozer init
           # Update buildozer.spec with our settings
           sed -i '/^\[app\]/,/^\[/!d' buildozer.spec
-          cat >> buildozer.spec <<EOL
+          cat << 'EOL' >> buildozer.spec
 [app]
 title = Eye Disease Detector
 package.name = eyediseasedetector
