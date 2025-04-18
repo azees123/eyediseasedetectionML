@@ -113,6 +113,8 @@ android.sdk = 31
 # (str) Android NDK version to use
 android.ndk = 25.2.9519653
 
+android.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653
+
 android.target = 31 
 
 android.build_tools = 36.0.0
