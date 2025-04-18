@@ -46,9 +46,9 @@ jobs:
       run: |
         buildozer android debug  # Change to 'android release' for production builds
 
-    # Step 6: Upload the APK as an artifact
+    # Step 6: Upload APK as artifact
     - name: Upload APK as artifact
-      uses: actions/upload-artifact@v3  # Updated to v3
+      uses: actions/upload-artifact@v2  # Use v2 to avoid issues with v3
       with:
         name: EyeDiseaseDetector-APK
         path: ./bin/*.apk  # Ensure this path matches the location where your APK is generated
