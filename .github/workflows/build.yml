@@ -1,3 +1,5 @@
+name: Build Kivy Android APK
+
 on:
   push:
     branches: [ main ]
@@ -8,7 +10,8 @@ jobs:
 
     steps:
       # Step 1: Checkout the repository
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # Step 2: Set up Python environment
       - name: Set up Python 3.8
@@ -16,23 +19,34 @@ jobs:
         with:
           python-version: 3.8
 
-      # Step 3: Install system dependencies (including Cython)
-      - name: Install dependencies
+      # Step 3: Install system & Python dependencies
+      - name: Install system dependencies and Buildozer
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
-          pip install --upgrade pip
-          pip install cython  # Install Cython here
-          pip install buildozer  # Install Buildozer
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev zip unzip
+          python -m pip install --upgrade pip
+          pip install cython
+          pip install buildozer
 
-      # Step 4: Build APK using Buildozer
-      - name: Build APK
-        run: |
-          buildozer -v android debug
+      # Step 4: Build APK with verbose logs
+      - name: Build APK with Buildozer
+        run: buildozer --log-level 2 -v android debug
 
       # Step 5: Upload the generated APK
-      - name: Upload APK as artifact
+      - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: apk-package
           path: ./bin/*.apk
+
+      # Step 6: Upload build logs on failure
+      - name: Upload Buildozer Logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            .buildozer/android/platform/build-*/dists/*/build/intermediates/*/logs/**/*.txt
+            .buildozer/android/platform/build-*/build/*.log
+            .buildozer/*.log
