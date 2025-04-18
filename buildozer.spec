@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,plyer,Pillow,numpy
+requirements = python3,kivy,plyer,Pillow,numpy,tflite_runtime
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -113,7 +113,7 @@ android.sdk = 31
 # (str) Android NDK version to use
 android.ndk = 25.2.9519653
 
-android.ndk_path = /home/runner/work/eyediseasedetectionML/eyediseasedetectionML/android-sdk/ndk/25.2.9519653
+android.ndk_path = /path/to/ndk/25.2.9519653
 
 android.target = 31 
 
