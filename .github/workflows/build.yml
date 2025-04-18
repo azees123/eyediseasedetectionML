@@ -1,4 +1,4 @@
-name: Build APK with Buildozer
+name: Build Kivy APK
 
 on:
   push:
@@ -6,20 +6,19 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04  # <-- Use stable LTS version
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/app \
-            -w /app \
-            kivy/buildozer \
-            buildozer -v android debug
+      - name: Build APK using Buildozer
+        uses: digreatbrian/buildozer-action@v2
+        with:
+          python-version: 3.8
+          buildozer-cmd: buildozer -v android debug
 
-      - name: Upload APK
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: EyeDiseaseDetector-APK
