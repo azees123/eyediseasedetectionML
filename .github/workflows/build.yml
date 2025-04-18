@@ -1,24 +1,42 @@
+name: CI
 on:
   push:
-    branches: [ main ]  # Trigger the workflow on pushes to the 'main' branch
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Running on the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
-      - uses: actions/checkout@v4  # Checkout the latest code
+      - uses: actions/checkout@v2
 
-      # Step 2: Build the APK using Buildozer
-      - name: Build APK
-        uses: digreatbrian/buildozer-action@v2  # Using the Buildozer action to build APK
+      # used to cache dependencies with a timeout
+      - name: Get Date
+        id: get-date
+        run: |
+          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+        shell: bash
+
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v2
         with:
-          buildozer-cmd: buildozer -v android debug  # Command to build the APK
+          path: .buildozer_global
+          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
 
-      # Step 3: Upload APK as artifact
+      - uses: actions/cache@v2
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: master
+
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2  # Use the correct stable version v2 for uploading artifacts
+        uses: actions/upload-artifact@v2
         with:
           name: package
-          path: ./bin/*.apk  # Ensure this path is where the APK is saved
+          path: ${{ steps.buildozer.outputs.filename }}
