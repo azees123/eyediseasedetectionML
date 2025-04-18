@@ -9,36 +9,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Set up Python environment
       - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
-      - name: Install system dependencies
+      # Step 3: Install system dependencies and Buildozer
+      - name: Install system dependencies and Buildozer
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev zip unzip openjdk-11-jdk
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev zip unzip
+          sudo apt-get install -y libncurses6 openjdk-11-jdk
           python -m pip install --upgrade pip
-          pip install cython buildozer python-for-android
+          pip install cython
+          pip install buildozer==1.5.0
+          pip install python-for-android  # Ensure python-for-android is installed
 
-      - name: Set up Android SDK and NDK
-        uses: android-actions/setup-android@v2
-        with:
-          android-api-level: '31'
-          ndk-version: '25.2.9519653'
+      # Step 4: Install Android SDK and NDK
+      - name: Install Android SDK and NDK
+        run: |
+          mkdir -p $HOME/Android/cmdline-tools
+          cd $HOME/Android/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip
+          mv cmdline-tools latest
+          yes | $HOME/Android/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/Android/Sdk --licenses
+          yes | $HOME/Android/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/Android/Sdk \
+            "platform-tools" \
+            "platforms;android-31" \
+            "build-tools;30.0.3" \
+            "ndk;25.2.9519653"
 
-      - name: Set environment variables
+      # Step 5: Set Android environment variables
+      - name: Set environment variables for Android SDK/NDK
         run: |
           echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
           echo "ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/25.2.9519653" >> $GITHUB_ENV
           echo "JAVA_HOME=/usr/lib/jvm/temurin-11-jdk-amd64" >> $GITHUB_ENV
+          echo "PATH=$HOME/Android/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
+      # Step 6: Pre-create Buildozer folders to avoid permission issues
+      - name: Pre-create Buildozer folders
+        run: |
+          mkdir -p ~/.buildozer
+          mkdir -p ~/.buildozer/android/platform
+
+      # Step 7: Build APK with Buildozer
       - name: Build APK with Buildozer
         run: buildozer -v android debug
 
+      # Step 8: Upload APK
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
@@ -46,7 +72,8 @@ jobs:
           name: apk-package
           path: ./bin/*.apk
 
-      - name: Upload Build logs
+      # Step 9: Upload Build logs on failure
+      - name: Upload Buildozer Logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
