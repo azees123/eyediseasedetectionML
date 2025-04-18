@@ -28,11 +28,23 @@ jobs:
           pip install cython
           pip install buildozer
 
-      # Step 4: Build APK with verbose logs
+      # Step 4: Install Android SDK, NDK, and JDK
+      - name: Install Android SDK, NDK, and JDK
+        run: |
+          sudo apt-get install -y openjdk-11-jdk
+          sudo apt-get install -y unzip
+          sudo apt-get install -y libncurses5 libssl1.0.0
+          # Install Android SDK and NDK
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
+          unzip commandlinetools-linux-7302050_latest.zip -d $HOME/Android
+          yes | $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/sdk --licenses
+          yes | $HOME/Android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/Android/sdk "platform-tools" "platforms;android-31" "build-tools;30.0.3" "ndk;21.4.7075529"
+
+      # Step 5: Build APK with Buildozer
       - name: Build APK with Buildozer
         run: buildozer -v --log-level=debug android debug
 
-      # Step 5: Upload the generated APK
+      # Step 6: Upload APK
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
@@ -40,7 +52,7 @@ jobs:
           name: apk-package
           path: ./bin/*.apk
 
-      # Step 6: Upload build logs on failure
+      # Step 7: Upload Build logs on failure
       - name: Upload Buildozer Logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -50,3 +62,4 @@ jobs:
             .buildozer/android/platform/build-*/dists/*/build/intermediates/*/logs/**/*.txt
             .buildozer/android/platform/build-*/build/*.log
             .buildozer/*.log
+
