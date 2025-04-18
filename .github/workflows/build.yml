@@ -8,9 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # Increase timeout for Android SDK/NDK downloads
 
     env:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      ANDROID_NDK_VERSION: 25.2.9519653
+      ANDROID_BUILD_TOOLS_VERSION: 33.0.2
+      ANDROID_PLATFORM_VERSION: 31
 
     steps:
       - name: Checkout code
@@ -27,50 +31,69 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip zip git
+
       - name: Install Android SDK and NDK
         run: |
+          # Create SDK directory
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           cd $ANDROID_SDK_ROOT/cmdline-tools
+          
+          # Download and install command line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-          unzip tools.zip -d temp
+          unzip -q tools.zip -d temp
           mv temp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-          yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-          sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
-            "platform-tools" \
-            "platforms;android-31" \
-            "build-tools;33.0.2" \
-            "ndk;25.2.9519653"
-
-      - name: Set SDK tools in PATH
-        run: |
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          rm tools.zip
+          rm -rf temp
+          
+          # Add to PATH
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          
+          # Accept licenses
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+          
+          # Install platform tools
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+            "platform-tools" \
+            "platforms;android-$ANDROID_PLATFORM_VERSION" \
+            "build-tools;$ANDROID_BUILD_TOOLS_VERSION"
+          
+          # Install NDK directly (more reliable than through Buildozer)
+          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
+          unzip -q ndk.zip -d $ANDROID_SDK_ROOT
+          mv $ANDROID_SDK_ROOT/android-ndk-r25b $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION
+          rm ndk.zip
 
-      - name: Install dependencies and build APK
+      - name: Set environment variables
         run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install buildozer cython python-for-android
+          echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
+          echo "ANDROID_SDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_PATH
 
-          # Ensure Buildozer uses NDK 25
-          export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
-          export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer cython==0.29.36 python-for-android
 
-          # Optional: make sure buildozer.spec has the correct NDK version
-          sed -i '/^# *android.ndk *=/a android.ndk = 25.2.9519653' buildozer.spec || true
+      - name: Build APK
+        run: |
+          # Explicitly set paths for Buildozer
+          export ANDROIDSDK=$ANDROID_SDK_ROOT
+          export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION
+          export ANDROID_API=$ANDROID_PLATFORM_VERSION
+          
+          # Build the APK
+          buildozer -v android debug
 
-          # Clean build
-          buildozer android clean || echo "Clean failed, continuing"
-
-          # Build APK
-          buildozer android debug --log_level 2
-
-      - name: Upload APK as artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: EyeDiseaseDetector-APK
           path: bin/*.apk
+          if-no-files-found: error
