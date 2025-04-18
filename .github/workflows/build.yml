@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.9.13'
 
       - name: Install Android SDK and NDK
         run: |
@@ -52,9 +52,17 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_PATH
 
+      - name: Install Python dependencies
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip wheel setuptools
+          pip install buildozer==1.5.0 python-for-android==2023.10.06 cython==0.29.36
+
       - name: Convert model to TensorFlow Lite
         run: |
-          python3 -m pip install tensorflow
+          source venv/bin/activate
+          pip install tensorflow==2.14.0
           python3 -c "
           import tensorflow as tf
           model = tf.keras.models.load_model('eye_disease_model.h5')
@@ -63,12 +71,29 @@ jobs:
           open('eye_disease_model.tflite', 'wb').write(tflite_model)
           "
 
-      - name: Install Buildozer and dependencies
+      - name: Initialize Buildozer
         run: |
-          python3 -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip wheel setuptools
-          pip install buildozer cython python-for-android
+          buildozer init
+          # Update buildozer.spec with our settings
+          sed -i '/^\[app\]/,/^\[/!d' buildozer.spec
+          cat >> buildozer.spec <<EOL
+[app]
+title = Eye Disease Detector
+package.name = eyediseasedetector
+package.domain = org.eyedetector
+source.dir = .
+source.include_exts = py,png,jpg,kv,tflite
+main.py = eyedisease.py
+requirements = python3==3.9.13,kivy==2.2.1,plyer==2.1.0,Pillow==10.1.0,numpy==1.26.4,tflite-runtime==2.14.0
+android.archs = arm64-v8a
+android.api = 31
+android.minapi = 21
+android.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+orientation = portrait
+log_level = 2
+EOL
 
       - name: Build APK
         run: |
