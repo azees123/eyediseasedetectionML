@@ -1,3 +1,5 @@
+name: Build Eye Disease APK
+
 on:
   push:
     branches: [ main ]
@@ -5,16 +7,29 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Build APK
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache buildozer .buildozer & gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            .buildozer
+            ~/.gradle
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('**/buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
+      - name: Build APK with Buildozer
         uses: digreatbrian/buildozer-action@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
           buildozer-cmd: buildozer -v android debug
 
-      - name: Upload artifacts
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: package
+          name: EyeDiseaseDetector
           path: ./bin/*.apk
