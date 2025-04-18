@@ -13,7 +13,7 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,ttf,tflite
+source.include_exts = py,png,jpg,kv,tflite
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pillow,numpy,plyer,tensorflow,plyer
+requirements = python3,kivy,tensorflow
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -64,7 +64,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3.12
+osx.python_version = 3
 
 # Kivy version to use
 osx.kivy_version = 1.9.1
@@ -108,23 +108,22 @@ android.api = 31
 android.minapi = 21
 
 # (int) Android SDK version to use
-android.sdk = 31
+#android.sdk = 20
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 21b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-android.ndk_api = 21
-
+#android.ndk_api = 21
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path = 
+#android.ndk_path =
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path = 
+#android.sdk_path =
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
 #android.ant_path =
@@ -208,7 +207,7 @@ android.gradle_dependencies = "org.tensorflow:tensorflow-lite:2.11.0"
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
 # android.enable_androidx requires android.api >= 28
-android.enable_androidx = True
+#android.enable_androidx = True
 
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
@@ -311,14 +310,6 @@ android.release_artifact = aab
 
 # (str) The format used to package the app for debug mode (apk or aar).
 android.debug_artifact = apk
-
-# (bool) Whether to compile the application in debug mode or not
-# If False, it will build the release version (without debug info)
-android.debug = True
-
-# (bool) Whether to optimize the APK (disable debugging symbols)
-# This is used to reduce APK size and improve performance in production
-android.optimize = True
 
 #
 # Python for android (p4a) specific
