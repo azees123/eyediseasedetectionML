@@ -11,8 +11,6 @@ jobs:
 
     env:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
-      ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
-      ANDROID_NDK: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
 
     steps:
       - name: Checkout code
@@ -27,7 +25,7 @@ jobs:
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9.13'
+          python-version: '3.9'
 
       - name: Install Android SDK and NDK
         run: |
@@ -42,8 +40,7 @@ jobs:
             "platform-tools" \
             "platforms;android-31" \
             "build-tools;33.0.2" \
-            "ndk;25.2.9519653" \
-            "cmake;3.22.1"
+            "ndk;25.2.9519653"
 
       - name: Set SDK tools in PATH
         run: |
@@ -52,56 +49,25 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_PATH
 
-      - name: Install Python dependencies
+      - name: Install dependencies and build APK
         run: |
           python3 -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip wheel setuptools
-          pip install buildozer==1.5.0 python-for-android==2023.10.06 cython==0.29.36
+          pip install --upgrade pip
+          pip install buildozer cython python-for-android
 
-      - name: Convert model to TensorFlow Lite
-        run: |
-          source venv/bin/activate
-          pip install tensorflow==2.14.0
-          python3 -c "
-          import tensorflow as tf
-          model = tf.keras.models.load_model('eye_disease_model.h5')
-          converter = tf.lite.TFLiteConverter.from_keras_model(model)
-          tflite_model = converter.convert()
-          open('eye_disease_model.tflite', 'wb').write(tflite_model)
-          "
-
-      - name: Initialize Buildozer
-        run: |
-          source venv/bin/activate
-          buildozer init
-          # Update buildozer.spec with our settings
-          sed -i '/^\[app\]/,/^\[/!d' buildozer.spec
-          cat << 'EOL' >> buildozer.spec
-[app]
-title = Eye Disease Detector
-package.name = eyediseasedetector
-package.domain = org.eyedetector
-source.dir = .
-source.include_exts = py,png,jpg,kv,tflite
-main.py = eyedisease.py
-requirements = python3==3.9.13,kivy==2.2.1,plyer==2.1.0,Pillow==10.1.0,numpy==1.26.4,tflite-runtime==2.14.0
-android.archs = arm64-v8a
-android.api = 31
-android.minapi = 21
-android.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653
-android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
-orientation = portrait
-log_level = 2
-EOL
-
-      - name: Build APK
-        run: |
-          source venv/bin/activate
-          export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
+          # Ensure Buildozer uses NDK 25
+          export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
           export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
-          buildozer android clean
-          buildozer -v android debug
+
+          # Optional: make sure buildozer.spec has the correct NDK version
+          sed -i '/^# *android.ndk *=/a android.ndk = 25.2.9519653' buildozer.spec || true
+
+          # Clean build
+          buildozer android clean || echo "Clean failed, continuing"
+
+          # Build APK
+          buildozer android debug --log_level 2
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
