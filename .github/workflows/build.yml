@@ -2,61 +2,87 @@ name: Build Kivy APK
 
 on:
   push:
-    branches:
-      - main  # Trigger this on the main branch (or your specific branch)
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04  # Use the latest Ubuntu version
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    runs-on: ubuntu-latest
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+    env:
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Java 11
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      # Set up Python 3.9
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
         with:
           python-version: '3.9'
 
-      - name: Set up Android SDK and NDK
+      # Install Android SDK, NDK, and Build Tools
+      - name: Install Android SDK, NDK, and Build Tools
         run: |
-          sudo apt update
-          sudo apt install -y wget unzip
-          # Set up Android SDK and NDK
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
-          unzip commandlinetools.zip -d $ANDROID_SDK_ROOT
-          rm commandlinetools.zip
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          cd $ANDROID_SDK_ROOT/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip tools.zip -d temp
+          mv temp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2" "ndk;21.3.6528147"
+          yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+          sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-31" "build-tools;33.0.2" "build-tools;30.0.3" "ndk;21.3.6528147"
 
-      - name: Set up virtual environment
+      # List SDK directories (for debugging)
+      - name: List SDK directories (Debug)
         run: |
-          python -m venv venv
+          ls -l $ANDROID_SDK_ROOT/platform-tools
+          ls -l $ANDROID_SDK_ROOT/cmdline-tools/latest/bin
+          ls -l $ANDROID_SDK_ROOT/build-tools/33.0.2
+
+      # Add SDK tools to PATH
+      - name: Add SDK tools to PATH
+        run: |
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/build-tools/33.0.2" >> $GITHUB_PATH
+
+      # Install Buildozer, python-for-android, and dependencies
+      - name: Install Buildozer, python-for-android, and dependencies
+        run: |
+          python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install buildozer cython python-for-android
+          pip list  # Show installed packages to debug
 
-      - name: Verify installed dependencies
-        run: |
-          source venv/bin/activate
-          pip freeze
-
+      # Clean previous builds
       - name: Clean previous builds
         run: |
           source venv/bin/activate
           buildozer android clean || echo "Clean failed, continue anyway"
 
+      # Build APK using Buildozer
       - name: Build APK using Buildozer
         run: |
           source venv/bin/activate
           set -x
           export PATH="$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/build-tools/33.0.2:$ANDROID_SDK_ROOT/build-tools/30.0.3:$PATH"
-          ./venv/bin/buildozer android debug --debug --log_level=2 || { echo "Buildozer failed"; exit 1; }
+          ./venv/bin/buildozer android debug --debug || { echo "Buildozer failed"; exit 1; }
           set +x
 
-      - name: Upload APK as an artifact
-        uses: actions/upload-artifact@v3
+      # Upload APK as an artifact
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: ./bin/app-debug.apk
+          name: EyeDiseaseDetector-APK
+          path: bin/*.apk
