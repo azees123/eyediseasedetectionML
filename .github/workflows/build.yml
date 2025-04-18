@@ -71,6 +71,13 @@ jobs:
             exit 1
           fi
 
+      - name: Run AIDL Debugging Command
+        run: |
+          if [ -f "$ANDROID_SDK_ROOT/build-tools/33.0.2/aidl" ]; then
+            echo "Running AIDL with debug output..."
+            $ANDROID_SDK_ROOT/build-tools/33.0.2/aidl --help
+          fi
+
       - name: Build APK using Buildozer
         uses: digreatbrian/buildozer-action@v2
         with:
