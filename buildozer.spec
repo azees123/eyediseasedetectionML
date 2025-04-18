@@ -120,6 +120,12 @@ android.build_tools = 36.0.0
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 android.ndk_api = 21
 
+# (bool) Whether to package the app as an APK for Android
+android = True
+
+# (str) Java version to use
+android.java = 11
+
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
 
