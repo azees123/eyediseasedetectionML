@@ -17,6 +17,7 @@ source.include_exts = py,png,jpg,kv,tflite
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
+source.include_patterns = eye_disease_model.tflite
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -37,7 +38,9 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,tensorflow,plyer,pillow
+requirements = python3,kivy,plyer,pillow,numpy,tflite-runtime
+
+eyedisease.py = eyedisease.py
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -120,7 +123,7 @@ android.ndk_api = 21
 #android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-android.ndk_path = /usr/local/lib/android/sdk/ndk/27.2.12479018
+#android.ndk_path = /usr/local/lib/android/sdk/ndk/27.2.12479018
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path =
@@ -187,7 +190,7 @@ android.accept_sdk_license = True
 # Either form may be used, and assets need not be in 'source.include_exts'.
 # 1) android.add_assets = source_asset_relative_path
 # 2) android.add_assets = source_asset_path:destination_asset_relative_path
-android.add_assets = eye_disease_model.tflite
+#android.add_assets = eye_disease_model.tflite
 
 # (list) Put these files or directories in the apk res directory.
 # The option may be used in three ways, the value may contain one or zero ':'
