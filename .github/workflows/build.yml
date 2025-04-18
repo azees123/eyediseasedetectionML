@@ -30,7 +30,7 @@ jobs:
 
       # Step 4: Build APK with verbose logs
       - name: Build APK with Buildozer
-        run: buildozer --log-level 2 -v android debug
+        run: buildozer --log-level debug -v android debug
 
       # Step 5: Upload the generated APK
       - name: Upload APK
