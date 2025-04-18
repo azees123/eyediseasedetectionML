@@ -26,7 +26,7 @@ jobs:
           pip install buildozer==1.5.0
           pip install python-for-android
 
-      - name: Install Android SDK and NDK
+      - name: Install Android SDK and NDK r25b
         run: |
           mkdir -p $HOME/Android/cmdline-tools
           cd $HOME/Android/cmdline-tools
@@ -38,13 +38,14 @@ jobs:
             "platform-tools" \
             "platforms;android-31" \
             "build-tools;30.0.3" \
-            "ndk;21.4.7075529"
+            "ndk;25.2.9519653"  # ✅ Use NDK r25b (exact version)
 
       - name: Set environment variables
         run: |
           echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
-          echo "ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/21.4.7075529" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo "ANDROIDNDK=$HOME/Android/Sdk/ndk/25.2.9519653" >> $GITHUB_ENV
           echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> $GITHUB_ENV
           echo "$HOME/Android/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
