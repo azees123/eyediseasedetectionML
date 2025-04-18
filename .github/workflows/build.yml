@@ -63,22 +63,18 @@ jobs:
           open('eye_disease_model.tflite', 'wb').write(tflite_model)
           "
 
-      - name: Update buildozer.spec
-        run: |
-          echo -e "\n[app]\nrequirements = python3,kivy,plyer,Pillow,numpy,tflite_runtime~=2.14.0\nandroid.ndk = 25.2.9519653\nandroid.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653\nsource.include_exts = py,png,jpg,kv,tflite" >> buildozer.spec
-
-      - name: Install dependencies and build APK
+      - name: Install Buildozer and dependencies
         run: |
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip wheel setuptools
           pip install buildozer cython python-for-android
 
-          # Explicitly set NDK paths
+      - name: Build APK
+        run: |
+          source venv/bin/activate
           export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
           export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
-
-          # Build with verbose logging
           buildozer android clean
           buildozer -v android debug
 
