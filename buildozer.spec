@@ -121,10 +121,10 @@ android.ndk_api = 21
 #android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path = 
+android.ndk_path = /home/runner/Android/Sdk/ndk/25.2.9519653
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path =
+android.sdk_path = /home/runner/Android/Sdk
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
 #android.ant_path =
@@ -311,6 +311,14 @@ android.release_artifact = aab
 
 # (str) The format used to package the app for debug mode (apk or aar).
 android.debug_artifact = apk
+
+# (bool) Whether to compile the application in debug mode or not
+# If False, it will build the release version (without debug info)
+android.debug = True
+
+# (bool) Whether to optimize the APK (disable debugging symbols)
+# This is used to reduce APK size and improve performance in production
+android.optimize = True
 
 #
 # Python for android (p4a) specific
