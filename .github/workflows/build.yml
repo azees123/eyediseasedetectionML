@@ -56,18 +56,19 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython python-for-android
 
-          # Ensure Buildozer uses NDK 25
+          # Set NDK paths for Buildozer and patch spec
           export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
           export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/25.2.9519653
 
-          # Optional: make sure buildozer.spec has the correct NDK version
-          sed -i '/^# *android.ndk *=/a android.ndk = 25.2.9519653' buildozer.spec || true
+          # Patch buildozer.spec with exact path (important!)
+          sed -i '/^android.ndk_path/d' buildozer.spec
+          echo "android.ndk_path = $ANDROID_SDK_ROOT/ndk/25.2.9519653" >> buildozer.spec
 
           # Clean build
           buildozer android clean || echo "Clean failed, continuing"
 
-          # Build APK
-          buildozer android debug --log_level 2
+          # Build APK without trying to download anything
+          buildozer android debug --log_level 2 --no-android-upgrade
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
