@@ -1,5 +1,3 @@
-name: Build APK
-
 on:
   push:
     branches: [ main ]
@@ -7,66 +5,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build APK
+        uses: digreatbrian/buildozer-action@v2
         with:
-          python-version: "3.9"
+          python-version: 3.8
+          buildozer-cmd: buildozer -v android debug
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libtinfo6 \
-            build-essential \
-            git \
-            zip \
-            unzip \
-            openjdk-11-jdk \  # Try using OpenJDK 11 instead of 8
-            python3-pip \
-            python3-venv \
-            libffi-dev \
-            libssl-dev \
-            libsqlite3-dev \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libbz2-dev \
-            libreadline-dev \
-            liblzma-dev \
-            curl
-
-      - name: Install Android NDK 25b
-        run: |
-          mkdir -p $HOME/android-ndk
-          cd $HOME/android-ndk
-          curl -LO https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-          unzip -q android-ndk-r25b-linux.zip
-          echo "ANDROIDNDK=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
-          echo "ANDROID_NDK_HOME=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
-
-      - name: Install Android SDK components
-        run: |
-          sudo apt-get install -y android-sdk
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-31"  # Install necessary SDK components
-
-      - name: Install Buildozer and dependencies
-        run: |
-          pip install --upgrade pip
-          pip install buildozer cython virtualenv
-
-      - name: Build the APK
-        run: |
-          # Run Buildozer with increased verbosity for debugging
-          buildozer -v -d android debug
-
-      - name: Upload APK Artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: EyeDiseaseDetection-APK
+          name: package
           path: ./bin/*.apk
