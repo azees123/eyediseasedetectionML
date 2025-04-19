@@ -212,7 +212,7 @@ android.add_assets = eye_disease_model.tflite
 #android.add_resources =
 
 # (list) Gradle dependencies to add
-android.gradle_dependencies = "org.tensorflow:tensorflow-lite:2.11.0"
+android.gradle_dependencies = org.tensorflow:tensorflow-lite:2.11.0
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
@@ -222,7 +222,7 @@ android.enable_androidx = True
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
 # see https://developer.android.com/studio/write/java8-support for further information
- android.add_compile_options = "sourceCompatibility = 1.8", "targetCompatibility = 1.8"
+android.add_compile_options = "sourceCompatibility = 1.8", "targetCompatibility = 1.8"
 
 # (list) Gradle repositories to add {can be necessary for some android.gradle_dependencies}
 # please enclose in double quotes 
