@@ -1,20 +1,22 @@
-on:
-  push:
-    branches: [ main ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build APK
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libtinfo6
+
+      - name: Build APK with Buildozer
         uses: digreatbrian/buildozer-action@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
           buildozer-cmd: buildozer -v android debug
 
-      - name: Upload artifacts
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: package
+          name: EyeDiseaseDetection-APK
           path: ./bin/*.apk
