@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y libtinfo5
+          sudo apt install -y libtinfo6
 
       - name: Build APK with Buildozer
         uses: digreatbrian/buildozer-action@v2
