@@ -25,7 +25,7 @@ jobs:
             git \
             zip \
             unzip \
-            openjdk-17-jdk \
+            openjdk-8-jdk \  # Use OpenJDK 8 instead of 17
             python3-pip \
             python3-venv \
             libffi-dev \
@@ -49,6 +49,12 @@ jobs:
           echo "ANDROID_NDK_HOME=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
           echo "ANDROID_NDK_ROOT=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
 
+      - name: Install Android SDK components
+        run: |
+          sudo apt-get install -y android-sdk
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-31"  # Install necessary SDK components
+
       - name: Install Buildozer and dependencies
         run: |
           pip install --upgrade pip
@@ -56,7 +62,8 @@ jobs:
 
       - name: Build the APK
         run: |
-          buildozer -v android debug
+          # Run Buildozer with increased verbosity for debugging
+          buildozer -v -d android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
