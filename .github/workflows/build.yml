@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Note: this is Ubuntu 24.04 (Noble) now
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,18 @@ jobs:
             libncursesw5-dev \
             libbz2-dev \
             libreadline-dev \
-            liblzma-dev
+            liblzma-dev \
+            curl
+
+      - name: Install Android NDK 25b
+        run: |
+          mkdir -p $HOME/android-ndk
+          cd $HOME/android-ndk
+          curl -LO https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip -q android-ndk-r25b-linux.zip
+          echo "ANDROIDNDK=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$HOME/android-ndk/android-ndk-r25b" >> $GITHUB_ENV
 
       - name: Install Buildozer and dependencies
         run: |
