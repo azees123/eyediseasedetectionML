@@ -25,7 +25,7 @@ jobs:
             git \
             zip \
             unzip \
-            openjdk-8-jdk \  # Use OpenJDK 8 instead of 17
+            openjdk-11-jdk \  # Try using OpenJDK 11 instead of 8
             python3-pip \
             python3-venv \
             libffi-dev \
