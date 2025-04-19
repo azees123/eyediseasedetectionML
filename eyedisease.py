@@ -1,7 +1,8 @@
 import os
 import numpy as np
 from PIL import Image
-import tensorflow as tf
+#import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 
 from kivy.app import App
 from kivy.uix.image import Image as KivyImage
@@ -13,7 +14,8 @@ from plyer import filechooser
 
 # === Load TensorFlow Lite model ===
 model_path = 'eye_disease_model.tflite'
-interpreter = tf.lite.Interpreter(model_path=model_path)
+#interpreter = tf.lite.Interpreter(model_path=model_path)
+interpreter = tflite.Interpreter(model_path=model_path)
 interpreter.allocate_tensors()
 
 # Disease label mapping
