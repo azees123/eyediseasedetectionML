@@ -1,97 +1,20 @@
-name: Build Kivy APK
-
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
-
-    env:
-      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
-      ANDROID_NDK_VERSION: 25b
-      ANDROID_BUILD_TOOLS_VERSION: 33.0.2
-      ANDROID_PLATFORM_VERSION: 31
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-          unzip zip git wget \
-          libgl1-mesa-dev libsqlite3-dev zlib1g-dev libffi-dev \
-          automake autoconf libtool autoconf-archive
-      
-      - name: Install Android SDK
-        run: |
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          cd $ANDROID_SDK_ROOT/cmdline-tools
-
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-          unzip -q tools.zip -d temp
-          mv temp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          rm -rf tools.zip temp
-
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
-            "platform-tools" \
-            "platforms;android-${ANDROID_PLATFORM_VERSION}" \
-            "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
-
-      - name: Install Android NDK
-        run: |
-          mkdir -p $ANDROID_SDK_ROOT/ndk
-          wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O ndk.zip
-          unzip -q ndk.zip -d $ANDROID_SDK_ROOT
-          mv $ANDROID_SDK_ROOT/android-ndk-r25b $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION
-          rm ndk.zip
-
-      - name: Set environment variables
-        run: |
-          echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
-          echo "ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_ENV
-          echo "ANDROID_SDK=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/build-tools/$ANDROID_BUILD_TOOLS_VERSION" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION" >> $GITHUB_PATH
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install buildozer==1.5.0 cython==0.29.36 \
-            "python-for-android @ https://github.com/kivy/python-for-android/archive/develop.zip"
-
+      - uses: actions/checkout@v4
       - name: Build APK
-        run: |
-          export ANDROIDSDK=$ANDROID_SDK_ROOT
-          export ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION
-          export ANDROID_API=$ANDROID_PLATFORM_VERSION
+        uses: digreatbrian/buildozer-action@v2
+        with:
+          python-version: 3.8
+          buildozer-cmd: buildozer -v android debug
 
-          buildozer -v android debug
-
-      - name: Upload APK artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: EyeDiseaseDetector-APK
-          path: bin/*.apk
-          if-no-files-found: error
+          name: package
+          path: ./bin/*.apk
